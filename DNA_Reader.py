@@ -3,50 +3,53 @@ import os
 import sys
 
 ########################################################################
-def fsa(path):
-    print '\t   ---fsa---'
-    print '\t>> fsa file found'
-    print '\t>> inPath       \t=', path
+def testFileExt(inPath):
+    print '\t   ---testFileExt---'
+    print '\t>> inPath       \t=', inPath
+    ext = os.path.splitext(inPath)[1]
+    print '\t>> ext          \t=', ext
+    if ext == '.fsa':
+        rf.fsa(inPath)
+        return True
+    elif ext == '.hid':
+        rf.hid(inPath)
+        return True
+    else:
+        print 'Extension not supported.'
+        print 'File must be either .fsa or .hid'
+        return False
 
-def hid(path):
-    print '\t   ---testPath---'
-    print '\t>> hid file found'
-    print '\t>> inPath       \t=', path
+def testDir(inPath, rec):
+    print '\t   ---testDir---'
+    print '\t>> inPath       \t=', inPath
+    print '\t>> rec          \t=', rec
+    if rec == 'y':
+        # recursive file reading logic from
+        # http://stackoverflow.com/questions/2212643/python-recursive-folder-read
+        for root, files in os.walk(inPath):
+            print('\t>> root         \t=' + root)
 
-def testFile(inPath):
-    print '\t   ---testFile---'
-    #absInPath = os.path.abspath(inPath)
-    if os.path.isfile(inPath):
-        #print str(os.path.abspath(inPath)), 'is a file'
-        ext = os.path.splitext(inPath)[1]
-        print '\t>> ext          \t=', ext
-        if ext == '.fsa':
-            fsa(inPath)
-        elif ext == '.hid':
-            hid(inPath)
+            #for filename in files:
+            #    path = os.path.join(root, filename)
+            #    testFileExt(path)
+        return True
+    elif rec == 'n':
+        print '"', str(inPath), '" is a directory, but recursion is off.'
+        return False
+    else:
+        print 'recursion parameter unknown. Use "y" for yes, and "n" for no.'
+        return False
 
 def testPath(inPath, rec):
     print '\t   ---testPath---'
     if os.path.exists(inPath):
         if os.path.isdir(inPath):
-            print '\t>> ', str(os.path.basename(inPath)), 'is a dir'
-            print '\t>> rec          \t=', rec
-            if rec == '1':
-                # recursive file reading logic from
-                # http://stackoverflow.com/questions/2212643/python-recursive-folder-read
-                for root, files in os.walk(inPath):
-                    print('\t>> root         \t=' + root)
-
-                    for filename in files:
-                        path = os.path.join(root, filename)
-                        testFile(path)
-            else:
-
-                print 'Directory found, but recursion is off.'
+            testDir(inPath, rec)
         elif os.path.isfile(inPath):
-            testFile(inPath)
+            testFileExt(inPath)
     else:
-        print str(inPath), 'is not a dir or file'
+        print '"', str(inPath), '" does not exist.'
+        return False
 
 print '\t   ---start---'
 if len(sys.argv) > 3:
@@ -66,4 +69,4 @@ else:
     print 'Not enough arguments.'
     print 'Format: inPath OutPath Recurse'
 
-print ''
+print '\n'

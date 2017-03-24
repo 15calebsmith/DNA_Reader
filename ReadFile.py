@@ -67,7 +67,7 @@ my_uint8 = bs.pack('u8', 123)  # This will pack 123 as an unsigned, 8 bit int.
 ovf = bs.pack('u8', -1)
 print "CAUTION: -1 becomes", bs.unpack('u8', ovf)[0]  # bitstruct uses C-type data types, so -1 will become 255!
 print bs.unpack('u8', my_uint8)[0]  # unpack always returns a tuple, [0] accesses first val
-
+print "###########"
 
 # April
 def read_byte(b_stream):
@@ -77,7 +77,7 @@ def read_byte(b_stream):
     assert \
         isinstance(b_stream, types.IntType) or \
         isinstance(b_stream, types.StringType), \
-        "Assert: read_byte() was given an invalid type: " + str(type(b_stream))
+        "read_byte() was given an invalid type: " + str(type(b_stream))
 
     return bs.unpack('u8', b_stream)[0]
 
@@ -86,49 +86,123 @@ def read_byte(b_stream):
 def read_char():
     pass
 
-# Frank
-def read_word():
-    pass
+
+def read_word(b_stream):
+    """
+    read_word()
+    :param b_stream: 2 byte hex string
+    :return: uint16
+    """
+
+    assert \
+        isinstance(b_stream, types.StringType), \
+        "read_byte() was given an invalid type: " + str(type(b_stream))
+    assert \
+        2 == len(b_stream), \
+        "read_byte() requires 2 bytes, got " + str(len(b_stream))
+
+    print len(b_stream)
+
+    return bs.unpack('u16', b_stream)
+
 
 # April
 def read_short():
     pass
 
+
 # Caleb
 def read_long():
     pass
 
-# Frank
-def read_float():
-    pass
+
+def read_float(b_stream):
+    """
+    read_float()
+    :param b_stream: 4 byte hex string
+    :return: float
+    """
+    assert \
+        isinstance(b_stream, types.StringType), \
+        "read_float() was given an invalid type: " + str(type(b_stream))
+    assert \
+        4 == len(b_stream), \
+        "read_float() requires 4 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('f32', b_stream)
+
 
 # April
 def read_double():
     pass
 
+
 # Caleb
 def read_date():
     pass
 
-# Frank
-def read_time():
-    pass
 
-# Frank
-def read_pstring():
-    pass
+def read_time(b_stream):
+    """
+    read_time()
+    :param b_stream: 4 byte hex string
+    :return: uint8 tuple (hour, minute, second, hsecond)
+    """
+    assert \
+        isinstance(b_stream, types.StringType), \
+        "read_float() was given an invalid type: " + str(type(b_stream))
+    assert \
+        4 == len(b_stream), \
+        "read_time() requires 4 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('u8u8u8u8', b_stream)
+
+
+# TODO: This one will need to be more rigorously tested against an actual pstring
+def read_pstring(file_iter):
+    """
+    read_pstring()
+    :param file_iter: an open, readable file iter at the start of a pstring
+    :return: string of variable length
+    """
+    assert \
+        isinstance(file_iter, file), \
+        "read_pstring requires a file, got  " + str(type(file_iter))
+
+    pstr_len = bs.unpack('s8', file_iter.read(1))[0]  # read one byte to get the len of the Pascal string
+    pascal_string = ""
+    i = 0
+    while i < pstr_len:
+        pascal_string += file_iter.read(1)
+
+    return pascal_string
+
 
 # Caleb
 def read_cstring():
     pass
 
-# Frank
-def read_thumb():
-    pass
+
+def read_thumb(b_stream):
+    """
+    read_thumb()
+    :param b_stream: 10 byte hex string
+    :return: tuple (d:int32, u:int32, c:uint8, n:uint8)
+    """
+    assert \
+        isinstance(b_stream, types.StringType), \
+        "read_thumb() was given an invalid type: " + str(type(b_stream))
+    assert \
+        10 == len(b_stream), \
+        "read_thumb() requires 10 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('s32s32u8u8', b_stream)
+
 
 # April
 def read_bool():
     pass
+
 
 # Hold off on worrying about this one; it's for user-defined data structs
 def read_user():

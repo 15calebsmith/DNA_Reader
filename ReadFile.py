@@ -83,14 +83,21 @@ def read_byte(b_stream):
 
 
 # Caleb
-def read_char(c_stream):
+def read_char(b_stream):
     assert \
-        isinstance(c_stream, types.IntType) or \
-        isinstance(c_stream, types.StringType), \
-        "Assert: read_char() was given an invalid type: " + str(type(c_stream))
+        isinstance(b_stream, types.IntType) or \
+        isinstance(b_stream, types.StringType), \
+        "read_char() was given an invalid type: " + str(type(b_stream))
 
-    return bs.unpack('s8', c_stream)[0]
-    #could also be bs.unpack('t8', c_stream)[0] if it is a ascii character
+    assert \
+        1 == len(b_stream), \
+        "read_char() requires 1 byte, got " + str(len(b_stream))
+
+    if (isinstance(b_stream, types.IntType)):
+        return bs.unpack('s8', b_stream)[0]
+    elif (isinstance(b_stream, types.StringType)):
+        return bs.unpack('t8', b_stream)[0]
+
 
 # Frank
 def read_word():
@@ -101,11 +108,17 @@ def read_short():
     pass
 
 # Caleb
-def read_long(l_stream):
+def read_long(b_stream):
     assert \
-        isinstance(l_stream, types.IntType), \
-        "Assert: read_long() was given an invalid type: " + str(type(l_stream))
-    return bs.unpack('s16', l_stream)[0]
+        isinstance(b_stream, types.IntType), \
+        "read_long() was given an invalid type: " + str(type(b_stream))
+
+    assert \
+        4 == len(b_stream), \
+        "read_long() requires 4 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('s16', b_stream)[0]
+
 
 # Frank
 def read_float():
@@ -116,11 +129,17 @@ def read_double():
     pass
 
 # Caleb
-def read_date(date_stream):
+def read_date(b_stream):
     assert \
-        isinstance(date_stream, types.IntType), \
-        "Assert: read_date() was given an invalid type: " + str(type(date_stream))
-    return bs.unpack('s16u8u8', date_stream)
+        isinstance(b_stream, types.IntType), \
+        "read_date() was given an invalid type: " + str(type(b_stream))
+
+    assert \
+        8 == len(b_stream), \
+        "read_date() requires 8 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('s16u8u8', b_stream)
+
 
 # Frank
 def read_time():
@@ -131,16 +150,22 @@ def read_pstring():
     pass
 
 # Caleb
-def read_cstring(cstring_stream, chars):
+def read_cstring(b_stream, chars):
     #quick loop for getting the format for how many chars to unpack
     fmt = ''
     for _ in range(chars):
         fmt = fmt + str('u8')
     fmt = fmt + 'p1'
     assert \
-        isinstance(cstring_stream, types.IntType), \
-        "Assert: read_cstring() was given an invalid type: " + str(type(cstring_stream))
-    return bs.unpack(fmt, cstring_stream)
+        isinstance(b_stream, types.IntType), \
+        "read_cstring() was given an invalid type: " + str(type(b_stream))
+
+    assert \
+        1 == len(b_stream), \
+        "read_cstring() requires 1 byte, got " + str(len(b_stream))
+
+    return bs.unpack(fmt, b_stream)
+
 
 # Frank
 def read_thumb():

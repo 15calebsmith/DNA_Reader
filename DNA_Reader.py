@@ -9,14 +9,15 @@ def testFileExt(inPath):
     ext = os.path.splitext(inPath)[1]
     print '\t>> ext          \t=', ext
     if ext == '.fsa':
-        rf.fsa(inPath)
+        #rf.fsa(inPath)
         return True
-    elif ext == '.hid':
-        rf.hid(inPath)
-        return True
+    # elif ext == '.hid':
+    #     #rf.hid(inPath)
+    #     return True
     else:
         print 'Extension not supported.'
-        print 'File must be either .fsa or .hid'
+        #print 'File must be either .fsa or .hid'
+        print 'File must be .fsa'
         return False
 
 def testDir(inPath, rec):

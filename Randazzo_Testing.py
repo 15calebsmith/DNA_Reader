@@ -45,7 +45,7 @@ print binascii.b2a_hex(bf.read(2))  # Version Number
 name = binascii.b2a_qp(bf.read(4))  # (SInt32) name
 number = int(binascii.b2a_hex(bf.read(4)))  # (SInt32) tag number
 element_type = bf.read(2)  # (SInt16) element type code
-element_size = int(binascii.b2a_hex(bf.read(4)), 16)  # (SInt16) size in bytes of one element
+element_size = int(binascii.b2a_hex(bf.read(2)), 16)  # (SInt16) size in bytes of one element
 num_elements = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) number of elements in item
 data_size = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) size in bytes of item
 data_offset = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) item's data, or offset in file

@@ -83,8 +83,12 @@ def read_byte(b_stream):
     return bs.unpack('u8', b_stream)[0]
 
 
-# Caleb
+# TODO: more testing on this is needed because ABIF description is somewhat ambiguous
 def read_char(b_stream):
+    '''
+    :param b_stream: 1 byte hex string
+    :return:
+    '''
     assert \
         isinstance(b_stream, types.IntType) or \
         isinstance(b_stream, types.StringType), \
@@ -139,8 +143,11 @@ def read_short(b_stream):
 
 
 
-# Caleb
 def read_long(b_stream):
+    '''
+    :param b_stream: 4 byte hex string
+    :return: tuple (SInt32)
+    '''
     assert \
         isinstance(b_stream, types.IntType), \
         "read_long() was given an invalid type: " + str(type(b_stream))
@@ -187,17 +194,21 @@ def read_double(b_stream):
 
 
 
-# Caleb
 def read_date(b_stream):
+    '''
+    :param b_stream: 4 byte hex string
+    :return: tuple (SInt16, UInt8, UInt8)
+    '''
     assert \
         isinstance(b_stream, types.IntType), \
         "read_date() was given an invalid type: " + str(type(b_stream))
 
     assert \
-        8 == len(b_stream), \
-        "read_date() requires 8 bytes, got " + str(len(b_stream))
+        4 == len(b_stream), \
+        "read_date() requires 4 bytes, got " + str(len(b_stream))
 
     return bs.unpack('s16u8u8', b_stream)
+
 
 
 def read_time(b_stream):
@@ -214,6 +225,7 @@ def read_time(b_stream):
         "read_time() requires 4 bytes, got " + str(len(b_stream))
 
     return bs.unpack('u8u8u8u8', b_stream)
+
 
 
 # TODO: This one will need to be more rigorously tested against an actual pstring
@@ -236,8 +248,14 @@ def read_pstring(file_iter):
     return pascal_string
 
 
-# Caleb
+
+# TODO: This one will need to be more rigorously tested against an actual cstring
 def read_cstring(b_stream, chars):
+    '''
+    :param b_stream: stream of variable length defined by chars
+    :param chars: number of chars in string
+    :return: string of variable length
+    '''
     #quick loop for getting the format for how many chars to unpack
     fmt = ''
     for _ in range(chars):

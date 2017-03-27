@@ -37,6 +37,10 @@ def testDir(inPath, rec):
     print '\t>> testDir          | rec          \t=', rec
     validFileList = []
     print '\t>> testDir          | validFileList\t=', validFileList
+
+    if (rec != 'y' and rec != 'n'):
+        rec = raw_input('Recurse? (y/n): ')
+        print rec
     if rec == 'y':
         # recursive file reading logic from
         # http://stackoverflow.com/questions/2212643/python-recursive-folder-read
@@ -47,9 +51,6 @@ def testDir(inPath, rec):
 
             for folder in subFolders:
                 print('\t>> testDir          | folder        \t=' + str(folder))
-                #outfileName = inPath + "/" + folder + "/py-outfile.txt"  # hardcoded path
-                #folderOut = open(outfileName, 'w')
-                #print "outfileName is " + outfileName
             for filename in files:
                 print('\t>> testDir          | filename     \t=' + filename)
                 path = os.path.join(root, filename)
@@ -81,10 +82,13 @@ def testPath(inPath, rec):
         return []
 
 print '\t   ---start---'
-if len(sys.argv) > 3:
+if len(sys.argv) > 2:
     inPath = sys.argv[1]
     outPath = sys.argv[2]
-    recurse = sys.argv[3]
+    if len(sys.argv) > 3:
+        recurse = sys.argv[3]
+    else:
+        recurse = None
     normAbsInPath = os.path.normpath(os.path.abspath(inPath))
 
     print '\t>> start            | inpath       \t=', inPath
@@ -94,10 +98,11 @@ if len(sys.argv) > 3:
 
     validPaths = testPath(normAbsInPath, recurse)
     print '\t>> start            | validPaths   \t=', validPaths
+    print '\t>> start            | This is where we read the files'
     for file in validPaths:
         print '\t>> start            | file         \t=', file
 
 else:
     print 'Not enough arguments.'
-    print 'Format: inPath OutPath Recurse'
+    print 'Format: inPath OutPath [Recurse]'
 

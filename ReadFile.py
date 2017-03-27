@@ -135,7 +135,7 @@ def read_short(b_stream):
         2 == len(b_stream), \
         "read_short() requires 2 bytes, got " + str(len(b_stream))
 
-    return bs.unpack(s16, b_stream)[0]
+    return bs.unpack('s16', b_stream)[0]
 
 
 
@@ -284,7 +284,7 @@ def read_bool(b_stream):
     assert \
         1 == len(b_stream), \
         "read_bool() requires 1 byte, got " + str(len(b_stream))
-    return bs.unpack(b1, b_stream)
+    return bs.unpack('b1', b_stream)
 
 
 

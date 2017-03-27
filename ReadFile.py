@@ -69,15 +69,16 @@ print "CAUTION: -1 becomes", bs.unpack('u8', ovf)[0]  # bitstruct uses C-type da
 print bs.unpack('u8', my_uint8)[0]  # unpack always returns a tuple, [0] accesses first val
 
 
-# April
 def read_byte(b_stream):
-    # Use assert to check if a valid data type was passed to the function
-    # The compiler can remove asserts and docstrings later for optimization
-    # See the 'types' module for hints
+    """
+    read_byte()
+    :param b_stream: 1 byte hex string
+    :return: uint8
+    """
     assert \
         isinstance(b_stream, types.IntType) or \
         isinstance(b_stream, types.StringType), \
-        "Assert: read_byte() was given an invalid type: " + str(type(b_stream))
+        "read_byte() was given an invalid type: " + str(type(b_stream))
 
     return bs.unpack('u8', b_stream)[0]
 
@@ -103,9 +104,23 @@ def read_char(b_stream):
 def read_word():
     pass
 
-# April
-def read_short():
-    pass
+
+def read_short(b_stream):
+    """
+    read_short()
+    :param b_stream: 2 byte hex string
+    :return: sint16
+    """
+    assert \
+        isinstance(b_stream, types.IntType), \
+        "read_short() was given an invalid type: " + str(type(b_stream))
+
+    assert \
+        2 == len(b_stream), \
+        "read_short() requires 2 bytes, got " + str(len(b_stream))
+
+    return bs.unpack(s16, b_stream)[0]
+
 
 # Caleb
 def read_long(b_stream):
@@ -124,9 +139,22 @@ def read_long(b_stream):
 def read_float():
     pass
 
-# April
-def read_double():
-    pass
+
+def read_double(b_stream):
+    """
+    read_double()
+    :param b_stream: 8 byte hex string
+    :return: float64
+    """
+    assert \
+        isinstance(b_stream, types.StringType), \
+        "read_double() was given an invalid type: " + str(type(b_stream))
+    assert \
+        8 == len(b_stream), \
+        "read_double() requires 8 bytes, got " + str(len(b_stream))
+
+    return bs.unpack('64f', b_stream)[0]
+
 
 # Caleb
 def read_date(b_stream):
@@ -145,9 +173,11 @@ def read_date(b_stream):
 def read_time():
     pass
 
+
 # Frank
 def read_pstring():
     pass
+
 
 # Caleb
 def read_cstring(b_stream, chars):
@@ -171,9 +201,21 @@ def read_cstring(b_stream, chars):
 def read_thumb():
     pass
 
-# April
-def read_bool():
-    pass
+
+def read_bool(b_stream):
+    """
+    read_bool()
+    :param b_stream: 1 byte hex string
+    :return: bool
+    """
+    assert \
+        isinstance(b_stream, types.IntType), \
+        "read_bool() was given an invalid type: " + str(type(b_stream))
+    assert \
+        1 == len(b_stream), \
+        "read_bool() requires 1 byte, got " + str(len(b_stream))
+    return bs.unpack(b1, b_stream)
+
 
 # Hold off on worrying about this one; it's for user-defined data structs
 def read_user():

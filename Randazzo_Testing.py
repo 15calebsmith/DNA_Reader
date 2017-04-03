@@ -60,3 +60,17 @@ print "number of elements\t", num_elements
 print "size in byte data\t", data_size
 print "item data/offset\t", data_offset
 print "reserved\t\t\t", data_handle
+
+print "####################################"
+
+import bitstruct as bs
+
+bf.seek(0)  # reset seek
+print bs.unpack("t32", bf.read(4))
+print bs.unpack("s16", bf.read(2))[0]
+buffer = bs.unpack("t32s32s16s16s32s32s32s32", bf.read(28))
+num_elements = buffer[4]
+data_offset = buffer[6]
+print num_elements, data_offset
+bf.seek(data_offset)
+print bs.unpack("t32s32s16s16s32s32s32s32", bf.read(28))

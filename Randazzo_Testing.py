@@ -1,76 +1,90 @@
-import binascii
-import string
-import struct as s
-import time
-
-# open file
-bf = open("./sample_data/B4 1 Victim Std.fsa", 'r')
-
-'''
-ABIF uses C-type Structs to store binary data
-Python has a Struct module that can handle this:
-    docs.python.org/3.0/library/struct.html
-'''
-
-# Python Struct Example, pulling the whole length all at once
-start = time.clock()
-print string.join(s.unpack('cccc', bf.read(4))).replace(" ", "")
-print (time.clock() - start) * 100000, "ms"
-
-bf.seek(0)  # reset iter
-
-# Python Struct Example, one byte/char at a time
-start = time.clock()
-text = ''
-for byte in range(0, 4):
-    text += bf.read(1)
-print text
-print (time.clock() - start) * 100000, "ms"
-
-bf.seek(0)
-
-# Python's read(num_bytes) converts to strings the fastest
-start = time.clock()
-print bf.read(4)
-print (time.clock() - start) * 100000, "ms"
-
-bf.seek(0)
-print
-
-# TODO: Check file validity by comparing to 'ABIF'
-print bf.read(4)  # Should print "ABIF"
-print binascii.b2a_hex(bf.read(2))  # Version Number
-
-''' Directory Structure, see Page 8 and 9 of ABIF spec '''
-name = binascii.b2a_qp(bf.read(4))  # (SInt32) name
-number = int(binascii.b2a_hex(bf.read(4)))  # (SInt32) tag number
-element_type = bf.read(2)  # (SInt16) element type code
-element_size = int(binascii.b2a_hex(bf.read(2)), 16)  # (SInt16) size in bytes of one element
-num_elements = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) number of elements in item
-data_size = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) size in bytes of item
-data_offset = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) item's data, or offset in file
-data_handle = int(binascii.b2a_hex(bf.read(4)), 32)  # (SInt32) reserved
-
-print "--- Directory Structure ---"
-print "name\t\t\t\t", name
-print "tag number\t\t\t", number
-print "element type\t\t", element_type
-print "element size\t\t", element_size
-print "number of elements\t", num_elements
-print "size in byte data\t", data_size
-print "item data/offset\t", data_offset
-print "reserved\t\t\t", data_handle
-
-print "####################################"
+from collections import namedtuple
 
 import bitstruct as bs
 
-bf.seek(0)  # reset seek
-print bs.unpack("t32", bf.read(4))
-print bs.unpack("s16", bf.read(2))[0]
+######################################################################################
+# DEFINITIONS ########################################################################
+######################################################################################
+
+# Supported Element Type Numbers
+ELEMENT_TYPE_NUMBERS = (1, 2, 3, 4, 5, 7, 8, 10, 11, 13, 18, 19)
+
+# Named Tuple to store extracted directory entry fields
+ABIF_Entry = namedtuple("dir_entry", "tag_name \
+                                      tag_num \
+                                      elem_type \
+                                      elem_size \
+                                      num_elem \
+                                      data_size \
+                                      data_offset")
+
+# open file
+bf = open("./sample_data/B4 1 Victim Std.fsa", 'rb')
+bf.seek(0)
+
+######################################################################################
+# HEADER AREA ########################################################################
+######################################################################################
+
+# First 4 bytes = ABIF, next 2 bytes = Version Number
+buffer = bs.unpack("t32s16", bf.read(6))
+print "ABIF:        ", buffer[0]
+print "Version:     ", buffer[1]
+
+# Next 28 bytes are DirEntry struct, points to directory
 buffer = bs.unpack("t32s32s16s16s32s32s32s32", bf.read(28))
-num_elements = buffer[4]
+print "tdir:         ", buffer[0]
+print "Number:       ", buffer[1]
+print "Element Type: ", buffer[2]
+print "Element Size: ", buffer[3]
+print "Num Elements: ", buffer[4]
+print "Data Size:    ", buffer[5]
+print "Dir Offset:   ", buffer[6]
+print "__________________________________"
+
+dir_count = buffer[4]
 data_offset = buffer[6]
-print num_elements, data_offset
+
+# Last 94 bytes are reserved (ignore)
+bf.seek(94, 1)
+
+######################################################################################
+# DIRECTORY AREA #####################################################################
+######################################################################################
+
+# Seek to the directory entry offset specified in the header
 bf.seek(data_offset)
-print bs.unpack("t32s32s16s16s32s32s32s32", bf.read(28))
+
+# Iterate through the directory entries
+for i in range(0, dir_count, 1):
+    buffer = bs.unpack("t32s32s16s16s32s32s32s32", bf.read(28))
+    dir_entry = ABIF_Entry(tag_name=buffer[0],
+                           tag_num=buffer[1],
+                           elem_type=buffer[2],
+                           elem_size=buffer[3],
+                           num_elem=buffer[4],
+                           data_size=buffer[5],
+                           data_offset=buffer[6])
+
+    # TODO: Command line argument to allow user-defined data types (disabled by default)
+    if dir_entry.elem_type not in ELEMENT_TYPE_NUMBERS:
+        continue
+
+    print "Tag Name:    ", dir_entry.tag_name
+    print "Tag Number:  ", dir_entry.tag_num
+    print "Element Type:", dir_entry.elem_type
+    print "Element Size:", dir_entry.elem_size
+    print "Num Elements:", dir_entry.num_elem
+    print "Data Size:   ", dir_entry.data_size
+
+    # If the data size <= 4, the data_offset field contains the value
+    # Otherwise, treat data_offset as the offset in the file to the value
+    if dir_entry.data_size > 4:
+        print "Data Offset: ", dir_entry.data_offset
+    else:
+        bf.seek(-4, 1)
+        print "Value:       ", bs.unpack("r32", bf.read(4))
+
+    print "__________________________________"
+
+# Use < to unpack Big Endian data formats stored in data_offset

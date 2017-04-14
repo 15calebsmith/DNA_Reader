@@ -56,7 +56,7 @@ print "name\t\t\t\t", name
 print "tag number\t\t\t", number
 print "element type\t\t", element_type
 print "element size\t\t", element_size
-print "number of elements\t", num_elements
+print "number of elements\t", num_elements 
 print "size in byte data\t", data_size
 print "item data/offset\t", data_offset
 print "reserved\t\t\t", data_handle

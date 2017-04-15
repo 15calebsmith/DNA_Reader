@@ -54,20 +54,36 @@ the data bytes are stored beginning at the high-order byte of the 32-bit field.
 # Note: Compile this file with into a .pyo file when complete (use -oo arg)
 import bitstruct as bs
 import types
+from collections import namedtuple
 
-'''
-Example using bitstruct to test read_bytes
 
-bitstruct is a friendly wrapper for Python's struct module
-Read the docs linked above; the module is very easy to learn!
-'''
-# I want to create the function for read_bytes. The ABIF file format specifies
-# it as an UNSIGNED 8 bit integer.
-my_uint8 = bs.pack('u8', 123)  # This will pack 123 as an unsigned, 8 bit int.
-ovf = bs.pack('u8', -1)
-print "CAUTION: -1 becomes", bs.unpack('u8', ovf)[0]  # bitstruct uses C-type data types, so -1 will become 255!
-print bs.unpack('u8', my_uint8)[0]  # unpack always returns a tuple, [0] accesses first val
-print "###########"
+# Named Tuple to store extracted directory entry fields
+ABIF_Entry = namedtuple("dir_entry", "tag_name \
+                                      tag_num \
+                                      elem_type \
+                                      elem_size \
+                                      num_elem \
+                                      data_size \
+                                      data_offset")
+
+
+def handle_data(_dir_entry, _VERBOSE=0):
+    """
+    Calls the correct function based on the given element type
+    CAUTION: handle_data does not reset the seek position...
+    It is the responsibility of the calling function to save the old seek position
+    :param _file_iter: The file reader
+    :param _elem_type: Enum'd data type
+    :param _data_offset: The absolute file position offset to where the data resides
+    :param _VERBOSE: optional print for debugging, says which function is called
+    :return: the data value
+    """
+
+    if _VERBOSE:
+        print "handle_data: Jumping to", element_type_enum[_dir_entry.elem_type].__name__
+
+    _dir_entry.file_iter.seek(_dir_entry.data_offset)
+    return element_type_enum[_dir_entry.data_offset]()
 
 def read_byte(b_stream):
     """
@@ -75,6 +91,7 @@ def read_byte(b_stream):
     :param b_stream: 1 byte hex string
     :return: uint8
     """
+    __name__ = "byte"
     assert \
         isinstance(b_stream, types.IntType) or \
         isinstance(b_stream, types.StringType), \
@@ -85,10 +102,13 @@ def read_byte(b_stream):
 
 # TODO: more testing on this is needed because ABIF description is somewhat ambiguous
 def read_char(b_stream):
-    '''
+    """
+    read_char()
     :param b_stream: 1 byte hex string
     :return:
-    '''
+    """
+
+    __name__ = "char"
     assert \
         isinstance(b_stream, types.IntType) or \
         isinstance(b_stream, types.StringType), \
@@ -104,7 +124,6 @@ def read_char(b_stream):
         return bs.unpack('t8', b_stream)[0]
 
 
-
 def read_word(b_stream):
     """
     read_word()
@@ -112,6 +131,7 @@ def read_word(b_stream):
     :return: uint16
     """
 
+    __name__ = "word"
     assert \
         isinstance(b_stream, types.StringType), \
         "read_byte() was given an invalid type: " + str(type(b_stream))
@@ -124,13 +144,14 @@ def read_word(b_stream):
     return bs.unpack('u16', b_stream)
 
 
-
 def read_short(b_stream):
     """
     read_short()
     :param b_stream: 2 byte hex string
     :return: sint16
     """
+
+    __name__ = "short"
     assert \
         isinstance(b_stream, types.IntType), \
         "read_short() was given an invalid type: " + str(type(b_stream))
@@ -142,12 +163,13 @@ def read_short(b_stream):
     return bs.unpack('s16', b_stream)[0]
 
 
-
 def read_long(b_stream):
-    '''
+    """
     :param b_stream: 4 byte hex string
     :return: tuple (SInt32)
-    '''
+    """
+
+    __name__ = "long"
     assert \
         isinstance(b_stream, types.IntType), \
         "read_long() was given an invalid type: " + str(type(b_stream))
@@ -159,13 +181,14 @@ def read_long(b_stream):
     return bs.unpack('s16', b_stream)[0]
 
 
-
 def read_float(b_stream):
     """
     read_float()
     :param b_stream: 4 byte hex string
     :return: float
     """
+
+    __name__ = "float"
     assert \
         isinstance(b_stream, types.StringType), \
         "read_float() was given an invalid type: " + str(type(b_stream))
@@ -176,13 +199,14 @@ def read_float(b_stream):
     return bs.unpack('f32', b_stream)
 
 
-
 def read_double(b_stream):
     """
     read_double()
     :param b_stream: 8 byte hex string
     :return: float64
     """
+
+    __name__ = "double"
     assert \
         isinstance(b_stream, types.StringType), \
         "read_double() was given an invalid type: " + str(type(b_stream))
@@ -193,12 +217,13 @@ def read_double(b_stream):
     return bs.unpack('64f', b_stream)[0]
 
 
-
 def read_date(b_stream):
-    '''
+    """
     :param b_stream: 4 byte hex string
     :return: tuple (SInt16, UInt8, UInt8)
-    '''
+    """
+
+    __name__ = "date"
     assert \
         isinstance(b_stream, types.IntType), \
         "read_date() was given an invalid type: " + str(type(b_stream))
@@ -210,13 +235,14 @@ def read_date(b_stream):
     return bs.unpack('s16u8u8', b_stream)
 
 
-
 def read_time(b_stream):
     """
     read_time()
     :param b_stream: 4 byte hex string
     :return: uint8 tuple (hour, minute, second, hsecond)
     """
+
+    __name__ = "time"
     assert \
         isinstance(b_stream, types.StringType), \
         "read_float() was given an invalid type: " + str(type(b_stream))
@@ -227,7 +253,6 @@ def read_time(b_stream):
     return bs.unpack('u8u8u8u8', b_stream)
 
 
-
 # TODO: This one will need to be more rigorously tested against an actual pstring
 def read_pstring(file_iter):
     """
@@ -235,18 +260,19 @@ def read_pstring(file_iter):
     :param file_iter: an open, readable file iter at the start of a pstring
     :return: string of variable length
     """
+
+    __name__ = "pstring"
     assert \
         isinstance(file_iter, file), \
         "read_pstring requires a file, got  " + str(type(file_iter))
 
-    pstr_len = bs.unpack('s8', file_iter.read(1))[0]  # read one byte to get the len of the Pascal string
+    pstr_len = bs.unpack('u8', file_iter.read(1))[0]  # read one byte to get the len of the Pascal string
     pascal_string = ""
-    i = 0
-    while i < pstr_len:
+
+    for i in range(0, pstr_len, 1):
         pascal_string += file_iter.read(1)
 
     return pascal_string
-
 
 
 # TODO: This one will need to be more rigorously tested against an actual cstring
@@ -256,6 +282,8 @@ def read_cstring(b_stream, chars):
     :param chars: number of chars in string
     :return: string of variable length
     '''
+
+    __name__ = "cstring"
     #quick loop for getting the format for how many chars to unpack
     fmt = ''
     for _ in range(chars):
@@ -272,13 +300,14 @@ def read_cstring(b_stream, chars):
     return bs.unpack(fmt, b_stream)
 
 
-
 def read_thumb(b_stream):
     """
     read_thumb()
     :param b_stream: 10 byte hex string
     :return: tuple (d:int32, u:int32, c:uint8, n:uint8)
     """
+
+    __name__ = "thumb"
     assert \
         isinstance(b_stream, types.StringType), \
         "read_thumb() was given an invalid type: " + str(type(b_stream))
@@ -289,13 +318,14 @@ def read_thumb(b_stream):
     return bs.unpack('s32s32u8u8', b_stream)
 
 
-
 def read_bool(b_stream):
     """
     read_bool()
     :param b_stream: 1 byte hex string
     :return: bool
     """
+
+    __name__ = "bool"
     assert \
         isinstance(b_stream, types.IntType), \
         "read_bool() was given an invalid type: " + str(type(b_stream))
@@ -305,7 +335,22 @@ def read_bool(b_stream):
     return bs.unpack('b1', b_stream)
 
 
-
 # Hold off on worrying about this one; it's for user-defined data structs
 def read_user():
+    __name__ = "user"
     pass
+
+
+element_type_enum = {1: read_byte,
+                     2: read_char,
+                     3: read_word,
+                     4: read_short,
+                     5: read_long,
+                     7: read_float,
+                     8: read_double,
+                     10: read_date,
+                     11: read_time,
+                     12: read_thumb,
+                     13: read_bool,
+                     18: read_pstring,
+                     19: read_cstring}

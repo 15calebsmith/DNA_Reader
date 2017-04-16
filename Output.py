@@ -1,15 +1,17 @@
 """
-Collection of functions that convert a given data container to an text based output format
+Writes data lists from an ABIF to a human-readable file format
 """
 
-from xml.dom.minidom import getDOMImplementation
 import random  # Used only for testing func, remove in final
-import types   # Used only in assertions
+from xml.dom.minidom import getDOMImplementation
 
-def toXML(tag_list, filename):
+import types  # Used only in assertions
+
+
+def write_xml(tag_list, filename):
     """
     toXML(): Creates an XML-style document from the tags and their values
-    :param tag_list: A dictionary of lists of values
+    :param tag_list: Tag dict from ABIF reader to process
     :param filename: Name of file to write to, no extension
     :return: None
     """
@@ -18,6 +20,8 @@ def toXML(tag_list, filename):
         "Filename cannot be empty."
     assert isinstance(tag_list, types.DictionaryType), \
         "Dictionary of lists required."
+
+    print "Writing", filename + ".xml...",
 
     # Setup DOM Object and list
     impl = getDOMImplementation()
@@ -42,13 +46,15 @@ def toXML(tag_list, filename):
     doc.writexml(file_writer, indent='\t\n', addindent='\t', encoding='utf-8')
     file_writer.close()
 
+    print "Done!"
 
-def testXML():
-    tag_list = {"Tag1" : 0, "Tag2" : 0, "Tag3" : 0, "Tag4" : 0, "Tag5" : 0, "Tag6" : 0}
+
+def test_xml():
+    tag_list = {"Tag1": 0, "Tag2": 0, "Tag3": 0, "Tag4": 0, "Tag5": 0, "Tag6": 0}
     for tag in tag_list:
         values = []
         for val in range(10):  # Add 10 values to the tag's list of values
             values.append(str(random.randrange(1, 100, 15)))  # Append random values
         tag_list[tag] = values
 
-    toXML(tag_list, "test")
+    write_xml(tag_list, "test")

@@ -96,10 +96,10 @@ def _unpack_float(size, bits):
 def _unpack_bytearray(size, bits):
     value = bytearray()
     for i in range(size // 8):
-        value.append(int(bits[8*i:8*i+8], 2))
+        value.append(int(bits[8 * i:8 * i + 8], 2))
     rest = size % 8
     if rest > 0:
-        value.append(int(bits[size-rest:], 2) << (8-rest))
+        value.append(int(bits[size - rest:], 2) << (8 - rest))
     return value
 
 
@@ -185,7 +185,7 @@ def pack(fmt, *args):
     if tail != 0:
         bits += (8 - tail) * '0'
 
-    return bytes(bytearray([int(''.join(bits[i:i+8]), 2)
+    return bytes(bytearray([int(''.join(bits[i:i + 8]), 2)
                             for i in range(0, len(bits), 8)]))
 
 
@@ -218,7 +218,7 @@ def unpack(fmt, data):
         if type_ == 'p':
             pass
         else:
-            value_bits = bits[i:i+size]
+            value_bits = bits[i:i + size]
 
             # reverse the bit order in little endian values
             if endianness == "<":
@@ -255,7 +255,7 @@ def calcsize(fmt):
     return sum([size for _, size, _ in _parse_format(fmt)])
 
 
-def byteswap(fmt, data, offset = 0):
+def byteswap(fmt, data, offset=0):
     """Swap bytes in `data` according to `fmt`, starting at byte
     `offset`. `fmt` must be an iterable, iterating over number of
     bytes to swap. For example, the format string "24" applied to the
@@ -274,7 +274,7 @@ def byteswap(fmt, data, offset = 0):
 
     for f in fmt:
         length = int(f)
-        value = data[i:i+length]
+        value = data[i:i + length]
         data_swapped += value[::-1]
         i += length
 

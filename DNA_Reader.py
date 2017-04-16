@@ -1,50 +1,56 @@
-import ReadFile as rf
+import Read_Types as rf
 import os
 import sys
 
+
 ########################################################################
-### Functions
+# Functions ############################################################
 ########################################################################
-def testFileExt(inPath):
-    '''
-    :param inPath: Path to file
+
+
+def test_file_ext(in_path):
+    """
+    :param in_path: Path to file
     :return: A list containing inPath if valid extension, otherwise empty list
-    '''
+    """
+
     print '\t   ---testFileExt---'
-    print '\t>> testFileExt      | inPath       \t=', inPath
-    ext = os.path.splitext(inPath)[1]
+    print '\t>> testFileExt      | inPath       \t=', in_path
+    ext = os.path.splitext(in_path)[1]
     print '\t>> testFileExt      | ext          \t=', ext
     if ext == '.fsa':
-        #rf.fsa(inPath)
-        return [inPath]
+        # rf.fsa(inPath)
+        return [in_path]
     # elif ext == '.hid':
     #     #rf.hid(inPath)
     #     return True
     else:
         print 'Extension not supported.'
-        #print 'File must be either .fsa or .hid'
+        # print 'File must be either .fsa or .hid'
         print 'File must be .fsa'
         return []
 
-def testDir(inPath, rec):
-    '''
-    :param inPath: Path to directory
+
+def test_dir(in_path, rec):
+    """
+    :param in_path: Path to directory
     :param rec: Boolean value to tell to recurse (True) or not (False)
     :return: List of paths to valid files, otherwise empty list
-    '''
-    print '\t   ---testDir---'
-    print '\t>> testDir          | inPath       \t=', inPath
-    print '\t>> testDir          | rec          \t=', rec
-    validFileList = []
-    print '\t>> testDir          | validFileList\t=', validFileList
+    """
 
-    if (rec != 'y' and rec != 'n'):
+    print '\t   ---testDir---'
+    print '\t>> testDir          | inPath       \t=', in_path
+    print '\t>> testDir          | rec          \t=', rec
+    valid_file_list = []
+    print '\t>> testDir          | valid_file_list\t=', valid_file_list
+
+    if rec != 'y' and rec != 'n':
         rec = raw_input('Recurse? (y/n): ')
         print rec
     if rec == 'y':
         # recursive file reading logic from
         # http://stackoverflow.com/questions/2212643/python-recursive-folder-read
-        for root, subFolders, files in os.walk(inPath):
+        for root, subFolders, files in os.walk(in_path):
             print('\t>> testDir          | root         \t=' + root)
             print('\t>> testDir          | subFolders   \t=' + str(subFolders))
             print('\t>> testDir          | files        \t=' + str(files))
@@ -55,31 +61,34 @@ def testDir(inPath, rec):
                 print('\t>> testDir          | filename     \t=' + filename)
                 path = os.path.join(root, filename)
                 print('\t>> testDir          | path         \t=' + path)
-                if testFileExt(path):
-                    validFileList.append(path)
+                if test_file_ext(path):
+                    valid_file_list.append(path)
     elif rec == 'n':
-        print '"', str(inPath), '" is a directory, but recursion is off.'
+        print '"', str(in_path), '" is a directory, but recursion is off.'
     else:
         print 'recursion parameter unknown. Use "y" for yes, and "n" for no.'
-    return validFileList
+    return valid_file_list
 
-def testPath(inPath, rec):
-    '''
-    :param inPath: Path to be tested
+
+def test_path(in_path, rec):
+    """
+    :param in_path: Path to be tested
     :param rec: Boolean value to tell to recurse (True) or not (False)
     :return: List of paths to valid files, otherwise empty list
-    '''
+    """
+
     print '\t   ---testPath---'
-    print '\t>> testPath         | inpath       \t=', inPath
+    print '\t>> testPath         | inpath       \t=', in_path
     print '\t>> testPath         | rec          \t=', rec
-    if os.path.exists(inPath):
-        if os.path.isdir(inPath):
-            return testDir(inPath, rec)
-        elif os.path.isfile(inPath):
-            return testFileExt(inPath)
+    if os.path.exists(in_path):
+        if os.path.isdir(in_path):
+            return test_dir(in_path, rec)
+        elif os.path.isfile(in_path):
+            return test_file_ext(in_path)
     else:
-        print '"', str(inPath), '" does not exist.'
+        print '"', str(in_path), '" does not exist.'
         return []
+
 
 print '\t   ---start---'
 if len(sys.argv) > 2:
@@ -96,13 +105,12 @@ if len(sys.argv) > 2:
     print '\t>> start            | recurse      \t=', recurse
     print '\t>> start            | normAbsInPath\t=', normAbsInPath
 
-    validPaths = testPath(normAbsInPath, recurse)
+    validPaths = test_path(normAbsInPath, recurse)
     print '\t>> start            | validPaths   \t=', validPaths
     print '\t>> start            | This is where we read the files'
-    for file in validPaths:
-        print '\t>> start            | file         \t=', file
+    for cur_file in validPaths:
+        print '\t>> start            | file         \t=', cur_file
 
 else:
     print 'Not enough arguments.'
     print 'Format: inPath OutPath [Recurse]'
-

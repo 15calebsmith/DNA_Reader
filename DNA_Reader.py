@@ -15,7 +15,7 @@ def test_file_ext(in_path):
     """
 
     log('\t   ---testFileExt---')
-    log('\t>> testFileExt      | inPath       \t=' + in_path)
+    log('\t>> testFileExt      | inPath       \t=' + str(in_path))
     ext = os.path.splitext(in_path)[1]
     log('\t>> testFileExt      | ext          \t=' + ext)
     if ext == '.fsa':
@@ -39,8 +39,8 @@ def test_dir(in_path, rec):
     """
 
     log('\t   ---testDir---')
-    log('\t>> testDir          | inPath       \t=' + in_path)
-    log('\t>> testDir          | rec          \t=' + rec)
+    log('\t>> testDir          | inPath       \t=' + str(in_path))
+    log('\t>> testDir          | rec          \t=' + str(rec))
     valid_file_list = []
     log('\t>> testDir          | valid_file_list\t=' + str(valid_file_list))
 
@@ -78,8 +78,8 @@ def test_path(in_path, rec):
     """
 
     log('\t   ---testPath---')
-    log('\t>> testPath         | inpath       \t=' + in_path)
-    log('\t>> testPath         | rec          \t=' + rec)
+    log('\t>> testPath         | inpath       \t=' + str(in_path))
+    log('\t>> testPath         | rec          \t=' + str(rec))
     if os.path.exists(in_path):
         if os.path.isdir(in_path):
             return test_dir(in_path, rec)
@@ -91,7 +91,7 @@ def test_path(in_path, rec):
 
 
 def log(msg):
-    if verbose:
+    if verbose == 'y':
         print(msg)
 
 
@@ -109,18 +109,19 @@ if len(sys.argv) > 2:
         verbose = None
 
     normAbsInPath = os.path.normpath(os.path.abspath(inPath))
+    validPaths = test_path(normAbsInPath, recurse)
 
     log('\t   ---start---')
-    log('\t>> start            | inpath       \t=' + inPath)
-    log('\t>> start            | outpath      \t=' + outPath)
-    log('\t>> start            | recurse      \t=' + recurse)
+    log('\t>> start            | inpath       \t=' + str(inPath))
+    log('\t>> start            | outpath      \t=' + str(outPath))
+    log('\t>> start            | recurse      \t=' + str(recurse))
     log('\t>> start            | normAbsInPath\t=' + normAbsInPath)
-
-    validPaths = test_path(normAbsInPath, recurse)
     log('\t>> start            | validPaths   \t=' + str(validPaths))
     log('\t>> start            | This is where we read the files')
-    if recurse == 'y' and len(validPaths) > 1:
-        print "rec123"
+
+
+    if len(validPaths) > 1:
+        log('\t>> start            | More than one valid file. outpath treated as dir.')
         if not os.path.exists(outPath):
             os.makedirs(outPath)
         for cur_file in validPaths:
@@ -129,13 +130,14 @@ if len(sys.argv) > 2:
             rdr.read_file(cur_file, False)
             rdr.write_xml(os.path.join(outPath, os.path.basename(cur_file)))
     elif len(validPaths) == 1:
-        print "norec3"
-        log('\t>> start            | file         \t=' + validPaths[0])
+        log('\t>> start            | Only one valid file. outpath treated as file name.')
+        log('\t>> start            | file         \t=' + str(validPaths[0]))
         rdr = reader.ABIF_Reader()
         rdr.read_file(validPaths[0], verbose)
         rdr.write_xml(outPath)
     else:
-        print "WHAT"
+        log("\t>> start            | validPaths has zero, or a negative number (error) of elements.")
+        log("\t>> start            | Expected only when input is a dir, and recursion is off (0 elements).")
 
 else:
     print 'Not enough arguments.'

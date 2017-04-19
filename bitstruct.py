@@ -104,7 +104,12 @@ def _unpack_bytearray(size, bits):
 
 
 def _unpack_text(size, bits):
-    return _unpack_bytearray(size, bits).decode('utf-8')
+    """Ignoring errors because was getting
+    UnicodeDecodeError: 'utf8' codec can't decode byte 0xce in position 0: unexpected end of data
+    for the file named PP16_A04_09L215_56Cns.fsa
+    """
+    return _unpack_bytearray(size, bits).decode('utf-8', errors='ignore')
+    # return _unpack_bytearray(size, bits).decode('utf-8')
 
 
 def pack(fmt, *args):

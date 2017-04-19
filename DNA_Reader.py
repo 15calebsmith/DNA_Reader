@@ -135,6 +135,7 @@ if len(sys.argv) > 2:
         rdr = reader.ABIF_Reader()
         rdr.read_file(validPaths[0], verbose)
         rdr.write_xml(outPath)
+        rdr.print_stats()
     else:
         log("\t>> start            | validPaths has zero, or a negative number (error) of elements.")
         log("\t>> start            | Expected only when input is a dir, and recursion is off (0 elements).")

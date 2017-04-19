@@ -95,7 +95,7 @@ class ABIF_Reader(object):
         self.dir_entry = self.ABIF_Entry
         self.tag_counts = {"UNSUPPORTED": 0, "TOTAL": 0}
 
-    def handle_data(self, verbose=0):
+    def handle_data(self, value=None, verbose=0):
         """
         Unpacks binary data of supported types and adds them to the tag dictionary
         :param verbose: Set to enable per-tag processing information
@@ -128,7 +128,10 @@ class ABIF_Reader(object):
 
         elif self.dir_entry.elem_type == 5:  # long
             for item in range(0, self.dir_entry.num_elem, 1):
-                new_data.append(rf.read_long(self.bf.read(4)))
+                if value==None:
+                    new_data.append(rf.read_long(self.bf.read(4)))
+                else:
+                    new_data.append(rf.read_long(value))
 
         elif self.dir_entry.elem_type == 7:  # float
             for item in range(0, self.dir_entry.num_elem, 1):
@@ -250,6 +253,16 @@ class ABIF_Reader(object):
             else:
                 if verbose:
                     print "In-Field data values not yet supported. Raw value returned."  # TODO
+                    # print "Data Offset: ", self.dir_entry.data_offset
+                    # import struct
+                    # bytes = struct.pack('>I', int(self.dir_entry.data_offset))
+                    # print "byte struct?:", bytes
+                    #
+                    # self.bf.seek(-4,1)
+                    # print bs.unpack("r32", bytes)
+                    # print bs.unpack("r32", self.bf.read(4))
+                    # if self.dir_entry.elem_type==5:
+                    #     self.handle_data(value=bytes, verbose=verbose)
                     print "__________________________________"
                     continue
                     # try:
